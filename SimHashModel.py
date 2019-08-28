@@ -11,20 +11,20 @@ from preprocess import metrics
 
 
 class SimHashModel():
-    def __init__(self, type, K=20):
-        # load model
-        try:
-            with open('./model/model_' + type + '.pickle', 'rb') as handle:
-                self.model = pickle.load(handle)
-                self.model.set_k(K)
-        except Exception as e:
-            self.model = None
-            print("Model {} not loaded ({})".format(type,e))
-
+    def __init__(self,K=20):
+        self.model = None
+        self.K = K
         self.nlp = spacy.load('en_core_web_' + config.size_nlp)
         self.normalizer = text_pipeline.TextPipeline(self.nlp)
 
-
+    def load_model(self,type):
+        # load model
+        try:
+            with open(config.path_models + type + '.pickle', 'rb') as handle:
+                self.model = pickle.load(handle)
+                self.model.set_k(self.K)
+        except Exception as e:
+            print("Model {} not loaded ({}, path: {})".format(type, e, config.path_models))
 
     def predict(self,query,threshold = config.default_threshold,N = config.num_recommendations,Trigram = False):
         if self.model == None:
@@ -76,7 +76,8 @@ if __name__ == '__main__':
     for t in ['paragraph', 'section','phrase']:
         print("== {} == ".format(t))
         type = t
-        model = SimHashModel(type)
+        model = SimHashModel()
+        model.load_model(type)
         with open('test_' + type + '.pickle', 'rb') as handle:
             queries = pickle.load(handle)
         random_index = random.randint(1,len(queries))

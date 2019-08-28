@@ -4,10 +4,10 @@ import config
 import json
 from SimHashModel import SimHashModel
 
-SimHash_f = SimHashModel('phrase')
-SimHash_p = SimHashModel('paragraph')
-SimHash_s = SimHashModel('section')
-# SimHash_t = SimHashModel('trigram')
+SimHash_f = SimHashModel()
+SimHash_p = SimHashModel()
+SimHash_s = SimHashModel()
+# SimHash_t = SimHashModel()
 #
 app = Flask(__name__)
 
@@ -81,28 +81,28 @@ def connect():
 	# load model phrase
 	global SimHash_f
 	if SimHash_f.model == None:
-		SimHash_f.load_lsh(config.path_models + "_phrase")
+		SimHash_f.load_model("phrase")
 		models.append("Phrase")
 	else:
 		models.append("Phrase")
 
 	global SimHash_p
 	if SimHash_p.model == None:
-		SimHash_p.load_lsh(config.path_models + "_paragraph")
+		SimHash_p.load_model("paragraph")
 		models.append("Paragraph")
 	else:
 		models.append("Paragraph")
 
-	global LSH_s
-	if LSH_s.model == None:
-		LSH_s.load_lsh(config.path_models + "_section")
+	global SimHash_s
+	if SimHash_s.model == None:
+		SimHash_s.load_model("section")
 		models.append("Section")
 	else:
 		models.append("Section")
 
 	# global SimHash_t
 	# if SimHash_t.model == None:
-	# 	SimHash_t.load_lsh(config.path_models + "_trigram")
+	# 	SimHash_t.load_model('trigram')
 	# 	models.append("TriGram")
 	# else:
 	# 	models.append("TriGram")
