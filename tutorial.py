@@ -47,7 +47,7 @@ def testing():
     exit(1)
 # testing()
 
-train = True
+train = False
 config.DEBUG = False
 
 if train:
@@ -103,12 +103,10 @@ else:
             results = index.get_near_dups(hash_query)
 
             if len(results) == 0:
-                num_queries -= 1
                 no_results += 1
                 res_json = []
 
             else:
-                num_queries -= 1
                 res_json = [
                     metrics.metric(query_norm, doc_retrival, pip, Trigram=False)
                     for doc_retrival in results
@@ -116,9 +114,10 @@ else:
                 res_json = [
                     res
                     for res in sorted(res_json, key=lambda i: i['lev'], reverse=True)
-                    if float(res['lev']) >= config.threshold
-                ][:config.num_results]
+                    if float(res['lev']) >= config.default_threshold
+                ][:config.num_recommendations]
 
+            num_queries -= 1
             timing_search = "%.2f ms" % ((time.time() - start_time) * 1000)
             values = [float(item['lev']) for item in res_json]
             if len(values) > 0:

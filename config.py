@@ -1,6 +1,7 @@
 size_nlp = "sm"
-num_results = 10
-threshold = 0.3
+num_recommendations = 10
+default_threshold = 0.3
+
 date_pattern = "(\d{2}|\d{1})(\s{1}|-|/)"+\
 "((Jan(uary)?|(Feb(ruary)?|Ma(r(ch)?|y)|Apr(il)?|Jun(e)?|Jul(y)?|Aug(ust)|(Sept|Nov|Dec)(ember)?)|Oct(ober)?)|(\d{1}|\d{2}))"+\
                "(\s{1}|-|/)(\d{4}|(')?\d{2})"
