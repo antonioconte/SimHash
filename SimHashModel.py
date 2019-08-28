@@ -1,7 +1,6 @@
-import re
 from SimHash import Simhash, SimhashIndex
-from preprocess import process_data
 from preprocess import text_pipeline
+from preprocess import utils
 import spacy
 import config
 import json
@@ -9,8 +8,6 @@ import time
 import random
 import pickle
 from preprocess import metrics
-from statistics import mean
-import tqdm
 
 
 class SimHashModel():
@@ -29,15 +26,13 @@ class SimHashModel():
 
 
 
-    def predict(self,query,threshold = config.default_threshold,N = config.num_recommendations):
+    def predict(self,query,threshold = config.default_threshold,N = config.num_recommendations,Trigram = False):
         if self.model == None:
             raise Exception("Model is not loaded!")
 
-        # query = cleanhtml(query)
+        query = utils.cleanhtml(query)
 
-        Trigram = False
-        if type == "trigram":
-            Trigram = True
+        if Trigram:
             query_norm = ""
             tokens = []
         else:
@@ -78,16 +73,18 @@ class SimHashModel():
         }
 
 if __name__ == '__main__':
-    type = 'paragraph'
-    model = SimHashModel(type)
-    with open('test_' + type + '.pickle', 'rb') as handle:
-        queries = pickle.load(handle)
-    random_index = random.randint(1,len(queries))
-    query = queries[random_index]
-    # query = query[:len(query) - (random.randint(20,len(query))) ]
-    # query = query[:int(len(query)/2)]
+    for t in ['paragraph', 'section','phrase']:
+        print("== {} == ".format(t))
+        type = t
+        model = SimHashModel(type)
+        with open('test_' + type + '.pickle', 'rb') as handle:
+            queries = pickle.load(handle)
+        random_index = random.randint(1,len(queries))
+        query = queries[random_index]
+        # query = query[:len(query) - (random.randint(20,len(query))) ]
+        # query = query[:int(len(query)/2)]
 
-    print("Predicting....")
-    res = model.predict(query)
+        print("Predicting....")
+        res = model.predict(query)
 
-    print(json.dumps(res,indent=4))
+        print(json.dumps(res,indent=4))
