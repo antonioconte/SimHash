@@ -27,9 +27,9 @@ ip = socket.gethostbyname(socket.gethostname())
 
 if '130.136.4' in ip:
     filepath = './'
-    path_models = '/public/antonio_conteduca/model_SimHash/model'
+    path_models = '/public/antonio_conteduca/model_SimHash/model_'
 else:
     filepath = '/home/anto/Scrivania/Tesi/dataset_train/'
-    path_models = "/home/anto/Scrivania/Tesi/SimHash/model/model"
+    path_models = "/home/anto/Scrivania/Tesi/SimHash/model/model_"
 
 print(">>>> RUN ON " + ip)
