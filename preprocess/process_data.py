@@ -42,7 +42,7 @@ class Processer():
 
     def __iter__(self):
         if config.DEBUG:
-            docList = list(self.data['data'].keys())[:2]
+            docList = list(self.data['data'].keys())[:config.item_on_debug]
         else:
             docList = list(self.data['data'].keys())
 
@@ -54,7 +54,6 @@ class Processer():
             items_of_doc = self.data['data'][docname]
             for (i,item) in enumerate(items_of_doc):
                         data_list_normalized = self.normalizer.convert_trigram(item)
-
                         for key in data_list_normalized.keys():
                             yield [{
                                     'tag': '[' + docname + '#' + self.tag +"_"+str(uuid.uuid4())+ ']' + key,
@@ -63,7 +62,7 @@ class Processer():
                        ]
     def run(self):
         if config.DEBUG:
-            docList = list(self.data['data'].keys())[:2]
+            docList = list(self.data['data'].keys())[:config.item_on_debug]
         else:
             docList = list(self.data['data'].keys())
 

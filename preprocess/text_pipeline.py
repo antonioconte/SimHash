@@ -43,6 +43,7 @@ class TextPipeline:
     def remove_special_pattern(self,text):
         pattern = {
             config.date_pattern: "DATE",
+            "\(\d+\)+%": 'NUMPERC',
             "\(\d+\)+": '',         #(NUM)
             "(\(|\s{1})\d+\.": '',
             "\d+/\d+": 'NUMSLASH',  #NUM/NUM
@@ -70,8 +71,11 @@ class TextPipeline:
                 edited = edited.replace(token,"<date>")
                 original_data = " ".join(token.split("DATE_")[1].split("_"))
                 original = original.replace(token,original_data)
-            if 'NUMSLASH' in token:
+            elif 'NUMSLASH' in token:
                 edited = edited.replace(token, "<numslash>")
+            elif token in self.stopwords:
+                edited = edited.replace(token, "")
+
             edited = self.expand_abbr(edited)
 
         edited = " ".join(edited.lower().replace(","," ").replace("."," ").split())
@@ -192,7 +196,7 @@ def mark_date(text):
 if __name__ == '__main__':
 
     nlp = spacy.load('en_core_web_'+config.size_nlp)
-    sample = """(25) the general and specific chemical requirements laid down by this directive 
+    sample = """(25) 50% the general and specific chemical requirements laid down by this directive 
     should aim at protecting the health of children from certain substances in toys, 
     while the environmental concerns presented by toys are addressed by 
     horizontal environmental legislation applying to electrical and electronic toys, 
@@ -208,11 +212,11 @@ if __name__ == '__main__':
 
     # print("ORIGINAL: {}".format(sample))
     pip = TextPipeline(nlp)
-    # res = pip.convert_trigram(sample)
-    print(pip.norm_text_trigram(sample))
+    res = pip.convert_trigram(sample)
+    # print(pip.norm_text_trigram(sample))
     # res = pip.convert_trigram(sample)
     # print(res[-1])
-    # import json
-    # print("\nEDITED: {}".format(json.dumps(res,indent=4)))
+    import json
+    print("\nEDITED: {}".format(json.dumps(res,indent=4)))
 
     # print(list(res.keys())[-1])
