@@ -149,7 +149,7 @@ if __name__ == '__main__':
     # exit()
 
 
-    for t in ['trigram', 'paragraph', 'section', 'phrase'][:1]:
+    for t in ['trigram', 'paragraph', 'section', 'phrase']:
         if t == 'trigram':
             T = True
         type = t
@@ -160,15 +160,13 @@ if __name__ == '__main__':
         with open('test_' + type + '.pickle', 'rb') as handle:
             queries = pickle.load(handle)
 
-        for i in range(10):
+        NUM_TEST = 10
+
+        for i in range(NUM_TEST + 1):
 
             random_index = random.randint(1,len(queries)-1)
-            # random_index = 5
+
             query = queries[random_index]
-            # query = query[:len(query) - (random.randint(20,len(query))) ]
-            # query = query[:int(len(query)/2)]
-            # states not to allow for any storage _ states allow srage _ 87530828499696193
-            # query = "day following its publication"
             print("{}. Predicting....".format(i))
             res = model.predict(query, Trigram=True)
 
