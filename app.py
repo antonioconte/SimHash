@@ -46,6 +46,8 @@ def query():
 		maxResults = request.json['max']
 	except:
 		maxResults = config.num_recommendations
+
+
 	SimHash_m = None
 	T = False
 	if type == "Phrase":

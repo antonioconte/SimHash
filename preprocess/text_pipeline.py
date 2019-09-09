@@ -210,6 +210,9 @@ if __name__ == '__main__':
     of 20 december 1994 and those on batteries and accumulators and waste batteries 
     and accumulators by directive 2006/66/EC of the european parliament and of the council of 6 september 2006."""
 
+    sample = """
+    article 8 addressee this decision is addressed to pioneer overseas corporation, avenue des arts 44, 1040 brussels, belgium. 
+    """
     # print("ORIGINAL: {}".format(sample))
     pip = TextPipeline(nlp)
     res = pip.convert_trigram(sample)

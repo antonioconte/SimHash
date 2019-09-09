@@ -88,11 +88,11 @@ class SimHashModel():
 
         if Trigram:
             query, query_norm = self.normalizer.norm_text_trigram(query)
-            print("Query: ",query)
-            print("Query Norm: ",query_norm)
+            # print("Query: ",query)
+            # print("Query Norm: ",query_norm)
             tokens = query_norm
-            hash_query_test = Simhash(tokens)
-            print("hashValue: ",hash_query_test.value)
+            # hash_query_test = Simhash(tokens)
+            # print("hashValue: ",hash_query_test.value)
 
         else:
             query_norm = self.normalizer.convert(query,divNGram=False)
@@ -142,6 +142,14 @@ if __name__ == '__main__':
     # print("TOTAL: {}".format(len(l)))
     # exit()
 
+    # ===== PREDICT ALONE ==================================
+    query ="article 8 addressee this decision is addressed to pioneer overseas corporation, avenue des arts 44, 1040 brussels"
+    type = 'trigram'
+    model.load_model(type)
+    res = model.predict(query, Trigram=True)
+    print(json.dumps(res, indent=4))
+    exit()
+
     # ===== TRAIN ==========================================
     # type = 'trigram'
     # config.DEBUG = False
@@ -168,6 +176,6 @@ if __name__ == '__main__':
 
             query = queries[random_index]
             print("{}. Predicting....".format(i))
-            res = model.predict(query, Trigram=True)
+            res = model.predict(query, Trigram=T)
 
             print(json.dumps(res,indent=4))
