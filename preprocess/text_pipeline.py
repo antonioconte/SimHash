@@ -83,37 +83,6 @@ class TextPipeline:
 
         return original, edited
 
-    def convert_trigram(self,text):
-        text = mark_date(text)
-        text,_ = self.remove_special_pattern(text)
-
-        tokens = text.split()
-        trigrams = {}
-        for i in range(len(tokens)):
-            current_trigrams = ""
-            k = 0
-            pos_current = i
-            while k < 3:
-                # se non è una stopword
-                if not tokens[pos_current] in self.stopwords:
-                    current_trigrams += " " + tokens[pos_current]
-                    k += 1
-                else:
-                    current_trigrams += " " + tokens[pos_current]
-
-                if k == 3:
-                    text_trigram, normalized_trigram = self.norm_trigram(current_trigrams.strip())
-
-                    trigrams[text_trigram] = [normalized_trigram]
-                if pos_current >= len(tokens) -1 :
-                    break
-                pos_current += 1
-
-
-
-        return trigrams
-
-
     def convert(self,text,divNGram=True,wordBased=True):
         # print("> ", text)
         if len(text) < 5:
@@ -161,17 +130,57 @@ class TextPipeline:
         else:
             return " ".join(words)
 
-    def norm_text_trigram(self,query):
-        ''' prende l'ultim trigramma della stringa '''
-        text = self.convert_trigram(query)
-        last = list(text.keys())
+
+    def convert_trigram(self, text, Train=True):
+        text = mark_date(text)
+        text, _ = self.remove_special_pattern(text)
+
+        tokens = text.split()
+        if Train:
+            trigrams = {}
+        else:
+            trigrams = []
+
+        for i in range(len(tokens)):
+            current_trigrams = ""
+            k = 0
+            pos_current = i
+            while k < 3:
+                # se non è una stopword
+                if not tokens[pos_current] in self.stopwords:
+                    current_trigrams += " " + tokens[pos_current]
+                    k += 1
+                else:
+                    current_trigrams += " " + tokens[pos_current]
+
+                if k == 3:
+                    text_trigram, normalized_trigram = self.norm_trigram(current_trigrams.strip())
+                    if Train:
+                        trigrams[text_trigram] = [normalized_trigram]
+                    else:
+                        trigrams += [{text_trigram: [normalized_trigram]}]
+                if pos_current >= len(tokens) - 1:
+                    break
+
+                pos_current += 1
+
+        # import json
+        # print(json.dumps(trigrams,indent=4,sort_keys=False))
+        # exit()
+
+        return trigrams
+
+    def norm_text_trigram(self, query):
+        ''' prende l'ultimo trigramma della stringa '''
+        # print(original, normalized[0]
+        text = self.convert_trigram(query, Train=False)[-1]
 
         try:
-            original = last[-1]
-            normalized = text[last[-1]][0]
-            return original,normalized
+            original = list(text.keys())[0]
+            normalized = list(text.values())[0][0]
+            return original, normalized
         except:
-            return query,"___"
+            return query, "___"
 
 
 def get_list_date(text, result=[]):
@@ -210,16 +219,13 @@ if __name__ == '__main__':
     of 20 december 1994 and those on batteries and accumulators and waste batteries 
     and accumulators by directive 2006/66/EC of the european parliament and of the council of 6 september 2006."""
 
-    sample = """
-    article 8 addressee this decision is addressed to pioneer overseas corporation, avenue des arts 44, 1040 brussels, belgium. 
-    """
+    # sample = """
+    # article 8 addressee this decision is addressed to pioneer overseas corporation, avenue des arts 44, 1040 brussels, belgium.
+    # """
     # print("ORIGINAL: {}".format(sample))
     pip = TextPipeline(nlp)
-    res = pip.convert_trigram(sample)
-    # print(pip.norm_text_trigram(sample))
-    # res = pip.convert_trigram(sample)
-    # print(res[-1])
-    import json
-    print("\nEDITED: {}".format(json.dumps(res,indent=4)))
+    print(pip.norm_text_trigram(sample))
 
-    # print(list(res.keys())[-1])
+    # res = pip.convert_trigram(sample)
+    # import json
+    # print("\nEDITED: {}".format(json.dumps(res,indent=4)))
