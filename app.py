@@ -83,7 +83,7 @@ def connect():
 	global SimHash_f
 	global SimHash_p
 	global SimHash_s
-	# global SimHash_t
+	global SimHash_t
 
 	SimHash_f = SimHashModel(type="phrase",k=k)
 	SimHash_f.load()
@@ -97,9 +97,9 @@ def connect():
 	SimHash_s.load()
 	models.append("Section")
 
-	# SimHash_t = SimHashModel(type="trigram", k=k)
-	# SimHash_t.load()
-	# models.append("TriGram")
+	SimHash_t = SimHashModel(type="trigram", k=k)
+	SimHash_t.load()
+	models.append("TriGram")
 
 
 	if len(models) ==  4:
