@@ -12,10 +12,11 @@ from preprocess.process_data import Processer
 from preprocess import metrics
 
 class SimHashModel():
-    def __init__(self,type="",k='3',t=10,isDataProc = False):
+    def __init__(self,type="",k='3',T=30,sign=128,isDataProc = False):
         self.model = None
         self.type = type
-        self.tollerance = t
+        self.tollerance = T
+        self.sign = sign
         self.k = k
         config.kGRAM = k
         self.nlp = spacy.load('en_core_web_' + config.size_nlp)
@@ -32,10 +33,9 @@ class SimHashModel():
             self.model = pickle.load(handle)
 
     def train(self):
-        print("======= Train: {} [Dataproc: {}, K = {}, Toll: {}] =======".format(self.type,self.isDataProc,self.k, self.tollerance))
+        print("======= Train: {} [Dataproc: {}, K = {}, Toll: {}, Sign = {}] =======".format(self.type,self.isDataProc,self.k, self.tollerance, self.sign))
         try:
             if type == 'trigram':
-                k = 10
                 p = iter(Processer(filepath=config.filepath, part=self.type))
                 data = []
                 for item in tqdm.tqdm(p):
@@ -46,7 +46,6 @@ class SimHashModel():
                     next(p)
             else:
                 if self.isDataProc:
-
                     with open(self.pathDataProc, 'rb') as handle:
                         data = pickle.load(handle)
                 else:
@@ -58,13 +57,12 @@ class SimHashModel():
 
         time.sleep(1)
 
-        print("======= INDEXING ({}) =======".format(self.type))
         objs = []
         for item in tqdm.tqdm(data):
-            objs += [(item['tag'], Simhash(item['data']))]
+            objs += [(item['tag'], Simhash(item['data'],f=self.sign))]
 
         start_time = time.time()
-        index = SimhashIndex(objs, k=self.tollerance)
+        index = SimhashIndex(objs,f=self.sign, k=self.tollerance)
         timing_index = "%.2f ms" % ((time.time() - start_time) * 1000)
         print("Indexing time: {}".format(timing_index))
 
@@ -87,9 +85,9 @@ class SimHashModel():
 
         start_time = time.time()
 
-        hash_query = Simhash(tokens)
+        hash_query = Simhash(tokens,f=self.sign)
 
-        results = self.model.get_near_dups(hash_query)
+        results = self.model.get_near_dups(hash_query,n=config.num_recommendations)
 
         timing_search = "%.2f ms" % ((time.time() - start_time) * 1000)
 
@@ -103,7 +101,7 @@ class SimHashModel():
                 if float(item['lev']) >= threshold:
                     res_json += [item]
             # ====== RE-RANKING =========================================================
-            res_json = sorted(res_json, key=lambda i: i['lev'], reverse=True)[:config.num_recommendations]
+            res_json = sorted(res_json, key=lambda i: i['lev'], reverse=True)
         #
         # tempo di ricerca + re-ranking
         timing = "%.2f ms" % ((time.time() - start_time) * 1000)

@@ -131,6 +131,12 @@ class SimhashIndex(object):
         self.f = f
         count = len(objs)
 
+        import time
+        start_time = time.time()
+
+
+        print("=== INDEXING SGN_L = {}, TOLERANCE = {}".format(f,k))
+
         if log is None:
             self.log = logging.getLogger("simhash")
         else:
@@ -146,12 +152,15 @@ class SimhashIndex(object):
 
             self.add(*q)
 
+        timing = "%.2f ms" % ((time.time() - start_time) * 1000)
+        print("Index end in {} ms".format(timing))
+
     def set_k(self,k):
         if k > 0:
             self.k = k
 
 
-    def get_near_dups(self, simhash):
+    def get_near_dups(self, simhash,n=10):
         """
         `simhash` is an instance of Simhash
         return a list of obj_id, which is in type of str
@@ -171,15 +180,16 @@ class SimhashIndex(object):
 
                 d = simhash.distance(sim2)
                 if d <= self.k:
-                    ans.add(obj_id)
-        return list(ans)
+                    ans.add((obj_id,d))
+        ans = [ i[0] for i in sorted(list(ans), key=lambda x: x[1])[:n]]
+        return ans
 
     def add(self, obj_id, simhash):
         """
         `obj_id` is a string
         `simhash` is an instance of Simhash
         """
-        assert simhash.f == self.f
+        assert simhash.f == self.f, (simhash.f,self.f)
 
         for key in self.get_keys(simhash):
             v = '%x,%s' % (simhash.value, obj_id)
