@@ -4,11 +4,7 @@ import config
 import json
 from SimHashModel import SimHashModel
 
-SimHash_f = SimHashModel()
-SimHash_p = SimHashModel()
-SimHash_s = SimHashModel()
-SimHash_t = SimHashModel()
-
+SimHash_f = SimHash_p = SimHash_s = SimHash_t = None
 app = Flask(__name__)
 
 
@@ -78,36 +74,32 @@ def query():
 
 @app.route('/connect/', methods=['GET'])
 def connect():
+	k = str(request.args.get('k', default=3, type=int))
+
 	models = []
 	msg = "NOT GOOD"
 	# load model phrase
+
 	global SimHash_f
-	if SimHash_f.model == None:
-		SimHash_f.load_model("phrase")
-		models.append("Phrase")
-	else:
-		models.append("Phrase")
-
 	global SimHash_p
-	if SimHash_p.model == None:
-		SimHash_p.load_model("paragraph")
-		models.append("Paragraph")
-	else:
-		models.append("Paragraph")
-
 	global SimHash_s
-	if SimHash_s.model == None:
-		SimHash_s.load_model("section")
-		models.append("Section")
-	else:
-		models.append("Section")
+	# global SimHash_t
 
-	global SimHash_t
-	if SimHash_t.model == None:
-		SimHash_t.load_model('trigram')
-		models.append("TriGram")
-	else:
-		models.append("TriGram")
+	SimHash_f = SimHashModel(type="phrase",k=k)
+	SimHash_f.load()
+	models.append("Phrase")
+
+	SimHash_p = SimHashModel(type="paragraph", k=k)
+	SimHash_p.load()
+	models.append("Paragraph")
+
+	SimHash_s = SimHashModel(type="section", k=k)
+	SimHash_s.load()
+	models.append("Section")
+
+	# SimHash_t = SimHashModel(type="trigram", k=k)
+	# SimHash_t.load()
+	# models.append("TriGram")
 
 
 	if len(models) ==  4:
@@ -121,7 +113,8 @@ def connect():
 			'models': models,
 			'path':config.path_models,
 			'wordbased': config.wordBased,
-			'ip': config.ip
+			'ip': config.ip,
+			'entryname': 'Simhash_k_'+k
 		}, indent=4, sort_keys=True),
 		status=200,
 		mimetype='application/json'

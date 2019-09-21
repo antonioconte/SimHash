@@ -8,37 +8,35 @@ import time
 import random
 import pickle
 import tqdm
+from preprocess.process_data import Processer
 from preprocess import metrics
 
 class SimHashModel():
-    def __init__(self,K=20):
+    def __init__(self,type="",k='3',t=10,isDataProc = False):
         self.model = None
-        self.K = K
+        self.type = type
+        self.tollerance = t
+        self.k = k
+        config.kGRAM = k
         self.nlp = spacy.load('en_core_web_' + config.size_nlp)
         self.normalizer = text_pipeline.TextPipeline(self.nlp)
+        self.isDataProc = isDataProc
+        self.pathDataProc = '/home/anto/Scrivania/Tesi/testing/processed_data/'+self.type+'_'+self.k
+        if type == 'trigram':
+            self.pathmodel = config.path_models + type
+        else:
+            self.pathmodel = config.path_models + type + '_' + self.k
 
-    def load_model(self, type):
-        # load model
-        try:
-            with open(config.path_models + type + '.pickle', 'rb') as handle:
-                self.model = pickle.load(handle)
-                self.model.set_k(self.K)
-        except Exception as e:
-            print("Model {} not loaded ({}, path: {})".format(type, e, config.path_models))
+    def load(self):
+        with open(self.pathmodel, 'rb') as handle:
+            self.model = pickle.load(handle)
 
-
-
-    def train(self, type=None, path_model="./model/",path="/home/anto/Scrivania/Tesi/dataset_train/"):
-        if type is None:
-            print("Type is not declared!!")
-            return
-
-        from preprocess import process_data
+    def train(self):
+        print("======= Train: {} [Dataproc: {}, K = {}, Toll: {}] =======".format(self.type,self.isDataProc,self.k, self.tollerance))
         try:
             if type == 'trigram':
-                limit = 1000
                 k = 10
-                p = iter(process_data.Processer(path, type))
+                p = iter(Processer(filepath=config.filepath, part=self.type))
                 data = []
                 for item in tqdm.tqdm(p):
                     data += [{
@@ -47,37 +45,30 @@ class SimHashModel():
                     }]
                     next(p)
             else:
-                k = 20
-                limit = 100
-                p = process_data.Processer(path, type)
-                data = p.run()
+                if self.isDataProc:
+
+                    with open(self.pathDataProc, 'rb') as handle:
+                        data = pickle.load(handle)
+                else:
+                    p = Processer(filepath=config.filepath, part=self.type)
+                    data = p.run()
         except Exception as e:
             print(e)
             return
 
         time.sleep(1)
 
+        print("======= INDEXING ({}) =======".format(self.type))
         objs = []
-        queries = []
-        print("======= INDEXING ({}) =======".format(type))
         for item in tqdm.tqdm(data):
-            if random.randint(1, limit) == 1:
-                queries += [item['tag'].split("]", 1)[1]]
-            # print(item['tag'], "_", item['data'], "_", Simhash(item['data']).value)
             objs += [(item['tag'], Simhash(item['data']))]
 
         start_time = time.time()
-        index = SimhashIndex(objs, k=k)
+        index = SimhashIndex(objs, k=self.tollerance)
         timing_index = "%.2f ms" % ((time.time() - start_time) * 1000)
         print("Indexing time: {}".format(timing_index))
 
-        # save test_file
-        with open('test_' + type + '.pickle', 'wb') as handle:
-            pickle.dump(queries, handle)
-
-        # save model
-        print("Saving on file: {}".format('test_' + type + '.pickle'))
-        with open(path_model+'model_' + type + '.pickle', 'wb') as handle:
+        with open(self.pathmodel, 'wb') as handle:
             pickle.dump(index, handle)
 
     def predict(self,query,threshold = config.default_threshold,N = config.num_recommendations,Trigram = False):
@@ -88,36 +79,32 @@ class SimHashModel():
 
         if Trigram:
             query, query_norm = self.normalizer.norm_text_trigram(query)
-            # print("Query: ",query)
-            # print("Query Norm: ",query_norm)
             tokens = query_norm
-            # hash_query_test = Simhash(tokens)
-            # print("hashValue: ",hash_query_test.value)
 
         else:
             query_norm = self.normalizer.convert(query,divNGram=False)
             tokens = self.normalizer.convert(query)
 
         start_time = time.time()
+
         hash_query = Simhash(tokens)
+
         results = self.model.get_near_dups(hash_query)
-        # tempo di ricerca
+
         timing_search = "%.2f ms" % ((time.time() - start_time) * 1000)
 
         if len(results) == 0:
             res_json = []
 
         else:
-            res_json = [
-                metrics.metric(query_norm, doc_retrival, self.normalizer, Trigram=Trigram)
-                for doc_retrival in results
-            ]
-            res_json = [
-                res
-                for res in sorted(res_json, key=lambda i: i['lev'], reverse=True)
-                if float(res['lev']) >= config.default_threshold
-            ][:config.num_recommendations]
-
+            res_json = []
+            for doc_retrival in results:
+                item = metrics.metric(query_norm, doc_retrival, self.normalizer, Trigram=Trigram)
+                if float(item['lev']) >= threshold:
+                    res_json += [item]
+            # ====== RE-RANKING =========================================================
+            res_json = sorted(res_json, key=lambda i: i['lev'], reverse=True)[:config.num_recommendations]
+        #
         # tempo di ricerca + re-ranking
         timing = "%.2f ms" % ((time.time() - start_time) * 1000)
 
@@ -131,51 +118,3 @@ class SimHashModel():
             'threshold':threshold
         }
 
-if __name__ == '__main__':
-    model = SimHashModel()
-
-    # ===== PRINT TEST FILE .pickle ========================
-    # type = 'trigram'
-    # with open('test_' + type + '.pickle', 'rb') as handle:
-    #     l = pickle.load(handle)
-    # [ print(i) for i in l]
-    # print("TOTAL: {}".format(len(l)))
-    # exit()
-
-    # ===== PREDICT ALONE ==================================
-    query ="article 8 addressee this decision is addressed to pioneer overseas corporation, avenue des arts 44, 1040 brussels"
-    type = 'trigram'
-    model.load_model(type)
-    res = model.predict(query, Trigram=True)
-    print(json.dumps(res, indent=4))
-    exit()
-
-    # ===== TRAIN ==========================================
-    # type = 'trigram'
-    # config.DEBUG = False
-    # model.train(type)
-    # exit()
-
-
-    for t in ['trigram', 'paragraph', 'section', 'phrase']:
-        if t == 'trigram':
-            T = True
-        type = t
-        print("== {} == ".format(t))
-        model.load_model(type)
-        print("model load!")
-
-        with open('test_' + type + '.pickle', 'rb') as handle:
-            queries = pickle.load(handle)
-
-        NUM_TEST = 10
-
-        for i in range(NUM_TEST + 1):
-
-            random_index = random.randint(1,len(queries)-1)
-
-            query = queries[random_index]
-            print("{}. Predicting....".format(i))
-            res = model.predict(query, Trigram=T)
-
-            print(json.dumps(res,indent=4))
