@@ -97,9 +97,9 @@ def connect():
 	SimHash_s.load()
 	models.append("Section")
 
-	SimHash_t = SimHashModel(type="trigram", k=k)
-	SimHash_t.load()
-	models.append("TriGram")
+	# SimHash_t = SimHashModel(type="trigram", k=k)
+	# SimHash_t.load()
+	# models.append("TriGram")
 
 
 	if len(models) ==  4:
