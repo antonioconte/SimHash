@@ -74,7 +74,7 @@ class SimHashModel():
         query = utils.cleanhtml(query)
 
         if Trigram:
-            query, query_norm = self.normalizer.norm_text_trigram(query)
+            query, query_norm = self.normalizer.get_last_trigram(query)
             tokens = query_norm
 
         else:

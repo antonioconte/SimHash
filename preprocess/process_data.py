@@ -19,10 +19,12 @@ import json
 import config
 import uuid
 class Processer():
+
     def __init__(self,filepath="",part=""):
         self.filepath = filepath + "total_" + part + ".json"
         self.nlp = spacy.load('en_core_web_'+config.size_nlp)
         self.normalizer = TextPipeline(self.nlp)
+
         if part == "paragraph" or part == "section" or part == "trigram":
             if part == "trigram":
                 # uso le frasi per l'estazione dei trigrammi
@@ -45,7 +47,6 @@ class Processer():
             docList = list(self.data['data'].keys())[:config.item_on_debug]
         else:
             docList = list(self.data['data'].keys())
-
 
         progress_doc = 0
         for docname in docList:
@@ -84,10 +85,16 @@ class Processer():
 
 
 if __name__ == '__main__':
+    config.DEBUG = True
+
     # p = Processer('/home/anto/Scrivania/Tesi/dataset_train/', 'paragraph')
     # p = Processer('/home/anto/Scrivania/Tesi/dataset_train/', 'section')
     # p = Processer('/home/anto/Scrivania/Tesi/dataset_train/', 'phrase')
-    p = Processer('/home/anto/Scrivania/Tesi/dataset_train/', 'trigram')
-    print(json.dumps(p.run(), indent=4, sort_keys=True))
+
+
+    processer = iter(Processer('/home/anto/Scrivania/Tesi/dataset_train/','trigram'))
+    for item in processer:
+        print(item)
+    # print(json.dumps(p.run(), indent=4, sort_keys=True))
 
 
