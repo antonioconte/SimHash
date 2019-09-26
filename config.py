@@ -27,6 +27,7 @@ abbr_dict = {
 abbr_expand = "|".join(list(abbr_dict.keys()))
 DEBUG = True
 wordBased = True
+pathDataProc = '/home/anto/Scrivania/Tesi/testing/processed_data/{}_{}'
 
 import socket
 ip = socket.gethostbyname(socket.gethostname())

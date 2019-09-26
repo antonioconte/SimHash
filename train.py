@@ -7,7 +7,7 @@ from SimHashModel import SimHashModel
 def train_all(k = '3',tolerance=30,SGN_L = 128):
     type = ['paragraph', 'section', 'phrase']
     for t in type:
-        model = SimHashModel(type=t, k=k, T=tolerance,sign=SGN_L,isDataProc=True)
+        model = SimHashModel(type=t, k=k, T=tolerance,sign=SGN_L)
         model.train()
         import gc
         gc.collect()
@@ -18,9 +18,12 @@ def train_all(k = '3',tolerance=30,SGN_L = 128):
 
 if __name__ == '__main__':
     TOLERANCE = 30
-    SGN_L = 128
     K = '3'
+    SGN_L = 128
     # ===== TRAIN ALL ======================================
     # config.DEBUG = True
-    #  k = { '1','2', '3'}
+    #  k = { '2', '3'}
+    train_all(k=K,tolerance=TOLERANCE,SGN_L=SGN_L)
+
+    K = '2'
     train_all(k=K,tolerance=TOLERANCE,SGN_L=SGN_L)

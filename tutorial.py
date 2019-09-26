@@ -3,10 +3,10 @@ import pickle
 import json
 from preprocess.metrics import metric
 type = 'phrase'
-k = '3'
+k = '1'
 
 SGN_L = 128
-TOLLERANCE = 25
+TOLLERANCE = 30
 with open('/home/anto/Scrivania/Tesi/testing/processed_data/'+type+'_'+k, 'rb') as f:
     data = pickle.load(f)
 
@@ -31,6 +31,7 @@ for id in [0,1,2,3,4]:
     print("Query : >",query)
 
     s1 = data[id]['data']
+    print("NORMALIZED: ",s1)
 
     start_time = time.time()
     s1_hash = Simhash(s1,f=SGN_L)

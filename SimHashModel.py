@@ -12,7 +12,7 @@ from preprocess.process_data import Processer
 from preprocess import metrics
 
 class SimHashModel():
-    def __init__(self,type="",k='3',T=30,sign=128,isDataProc = False):
+    def __init__(self,type="",k='3',T=30,sign=128):
         self.model = None
         self.type = type
         self.tollerance = T
@@ -21,8 +21,9 @@ class SimHashModel():
         config.kGRAM = k
         self.nlp = spacy.load('en_core_web_' + config.size_nlp)
         self.normalizer = text_pipeline.TextPipeline(self.nlp)
-        self.isDataProc = isDataProc
-        self.pathDataProc = '/home/anto/Scrivania/Tesi/testing/processed_data/'+self.type+'_'+self.k
+
+        self.pathDataProc = config.pathDataProc.format(self.type,self.k)
+
         if type == 'trigram':
             self.pathmodel = config.path_models + type
         else:
@@ -45,12 +46,9 @@ class SimHashModel():
                     }]
                     next(p)
             else:
-                if self.isDataProc:
-                    with open(self.pathDataProc, 'rb') as handle:
-                        data = pickle.load(handle)
-                else:
-                    p = Processer(filepath=config.filepath, part=self.type)
-                    data = p.run()
+                with open(self.pathDataProc, 'rb') as handle:
+                    data = pickle.load(handle)
+
         except Exception as e:
             print(e)
             return
