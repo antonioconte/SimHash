@@ -6,11 +6,13 @@ import time
 import random
 import json
 
-def testing(all=True,type='',k='3'):
-    if all:
-        types = ['paragraph', 'section', 'phrase']
-    else:
+def testing(type='',k='3'):
+
+    if len(type)>0:
         types = [type]
+    else:
+        types = ['trigram','paragraph', 'section', 'phrase']
+
 
     for t in types:
 
@@ -30,6 +32,8 @@ def testing(all=True,type='',k='3'):
         with open(path_test, 'rb') as handle:
             queries = pickle.load(handle)
 
+
+
         NUM_TEST = 10
         queries = queries[:NUM_TEST]
 
@@ -47,6 +51,5 @@ def testing(all=True,type='',k='3'):
     exit()
 
 if __name__ == '__main__':
-    type, k = 'phrase', '3'
-    testing(k=k)
+    testing(type='trigram')
 

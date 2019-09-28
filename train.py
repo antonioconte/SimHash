@@ -17,6 +17,10 @@ def train_all(k = '3',tolerance=30,SGN_L = 128):
 
 
 if __name__ == '__main__':
+    model = SimHashModel('trigram',k='3',T=30,sign=128)
+    model.train()
+    exit()
+
     TOLERANCE = 30
     K = '3'
     SGN_L = 128

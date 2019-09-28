@@ -34,30 +34,18 @@ class SimHashModel():
             self.model = pickle.load(handle)
 
     def train(self):
-        print("======= Train: {} [Dataproc: {}, K = {}, Toll: {}, Sign = {}] =======".format(self.type,self.isDataProc,self.k, self.tollerance, self.sign))
-        try:
-            if type == 'trigram':
-                p = iter(Processer(filepath=config.filepath, part=self.type))
-                data = []
-                for item in tqdm.tqdm(p):
-                    data += [{
-                        'tag': item[0]['tag'],
-                        'data': item[0]['data'][0]
-                    }]
-                    next(p)
-            else:
-                with open(self.pathDataProc, 'rb') as handle:
-                    data = pickle.load(handle)
-
-        except Exception as e:
-            print(e)
-            return
-
-        time.sleep(1)
+        print("======= Train: {} [K = {}, Toll: {}, Sign = {}] =======".format(self.type,self.k, self.tollerance, self.sign))
+        with open(self.pathDataProc, 'rb') as handle:
+            data = pickle.load(handle)
 
         objs = []
         for item in tqdm.tqdm(data):
-            objs += [(item['tag'], Simhash(item['data'],f=self.sign))]
+            tokens = item['data']
+
+            if self.type == 'trigram':
+                tokens = self.normalizer.generate_ngrams_char(item['data'][0])
+
+            objs += [(item['tag'], Simhash(tokens ,f=self.sign))]
 
         start_time = time.time()
         index = SimhashIndex(objs,f=self.sign, k=self.tollerance)
@@ -73,13 +61,24 @@ class SimHashModel():
 
         query = utils.cleanhtml(query)
 
-        if Trigram:
-            query, query_norm = self.normalizer.get_last_trigram(query)
-            tokens = query_norm
-
-        else:
-            query_norm = self.normalizer.convert(query,divNGram=False)
+        if self.type != 'trigram':
+            Trigram = False
+            query_norm = self.normalizer.convert(query,False)
             tokens = self.normalizer.convert(query)
+        else:
+            query, query_norm = self.normalizer.get_last_trigram(query)
+            if query_norm == None:
+                return {'query': query,
+                        'data': [],
+                        'time': '0 ms',
+                        'max': N,
+                        'time_search': '0 ms',
+                        'threshold': threshold}
+            else:
+                Trigram = True
+                tokens = self.normalizer.generate_ngrams_char(query_norm)
+
+
 
         start_time = time.time()
 

@@ -14,14 +14,15 @@ def metric(query_norm, doc, normalizer,Trigram = False):
     '''
     (tag,text) = doc.split("]",1)
     if Trigram:
-        _,text_norm = normalizer.norm_text_trigram(text)
+        _,text_norm = normalizer.get_last_trigram(text)
     else:
         text_norm = normalizer.convert(text, False)
+
+    text_norm = str.lower(text_norm)
 
     # print("QUERY", query_norm)
     # print("RES", text_norm)
 
     value = "%.2f" % sim_lev(query_norm,text_norm) # FAST
     return {'docname': tag[1:].split("#")[0],'text': text, 'lev': value}
-
 

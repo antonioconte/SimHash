@@ -1,6 +1,6 @@
 # Created by 1e0n in 2013
 from __future__ import division, unicode_literals
-
+import tqdm
 import re
 import sys
 import hashlib
@@ -146,7 +146,7 @@ class SimhashIndex(object):
 
         self.bucket = collections.defaultdict(set)
 
-        for i, q in enumerate(objs):
+        for i, q in tqdm.tqdm(enumerate(objs)):
             if i % 10000 == 0 or i == count - 1:
                 self.log.info('%s/%s', i + 1, count)
 
