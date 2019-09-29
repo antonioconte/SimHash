@@ -16,18 +16,24 @@ class SimHashModel():
         self.model = None
         self.type = type
         self.tollerance = T
-        self.sign = sign
         self.k = k
         config.kGRAM = k
         self.nlp = spacy.load('en_core_web_' + config.size_nlp)
         self.normalizer = text_pipeline.TextPipeline(self.nlp)
 
-        self.pathDataProc = config.pathDataProc.format(self.type,self.k)
-
         if type == 'trigram':
             self.pathmodel = config.path_models + type
+            self.sign = 64
+            self.tollerance = 15
+            self.k = '3'
+
         else:
+            self.tollerance = T
+            self.k = k
+            self.sign = sign
             self.pathmodel = config.path_models + type + '_' + self.k
+
+        self.pathDataProc = config.pathDataProc.format(self.type,self.k)
 
     def load(self):
         with open(self.pathmodel, 'rb') as handle:
@@ -39,8 +45,9 @@ class SimHashModel():
             data = pickle.load(handle)
 
         objs = []
-        for item in tqdm.tqdm(data):
+        for item in tqdm.tqdm(data[:100]):
             tokens = item['data']
+
 
             if self.type == 'trigram':
                 tokens = self.normalizer.generate_ngrams_char(item['data'][0])
@@ -56,16 +63,10 @@ class SimHashModel():
             pickle.dump(index, handle)
 
     def predict(self,query,threshold = config.default_threshold,N = config.num_recommendations,Trigram = False):
-        if self.model == None:
-            raise Exception("Model is not loaded!")
 
         query = utils.cleanhtml(query)
 
-        if self.type != 'trigram':
-            Trigram = False
-            query_norm = self.normalizer.convert(query,False)
-            tokens = self.normalizer.convert(query)
-        else:
+        if self.type == 'trigram':
             query, query_norm = self.normalizer.get_last_trigram(query)
             if query_norm == None:
                 return {'query': query,
@@ -78,6 +79,10 @@ class SimHashModel():
                 Trigram = True
                 tokens = self.normalizer.generate_ngrams_char(query_norm)
 
+        else:
+            Trigram = False
+            query_norm = self.normalizer.convert(query, False)
+            tokens = self.normalizer.convert(query)
 
 
         start_time = time.time()

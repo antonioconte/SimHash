@@ -28,6 +28,8 @@ def testing(type='',k='3'):
             # per prendere le frasi come spunto per i trigrammi
             t = 'phrase'
 
+
+
         path_test = '/home/anto/Scrivania/Tesi/testing/testing_file/'+t
         with open(path_test, 'rb') as handle:
             queries = pickle.load(handle)
@@ -51,5 +53,10 @@ def testing(type='',k='3'):
     exit()
 
 if __name__ == '__main__':
-    testing(type='trigram')
+    query = 'regulation shall ent'
+    model = SimHashModel(type='trigram')
+    model.load()
+    res = model.predict(query)
+    print(json.dumps(res,indent = 4))
+    # testing(type='trigram')
 
