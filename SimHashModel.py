@@ -24,7 +24,7 @@ class SimHashModel():
         if type == 'trigram':
             self.pathmodel = config.path_models + type
             self.sign = 64
-            self.tollerance = 15
+            self.tollerance = 5
             self.k = '3'
 
         else:
@@ -45,7 +45,7 @@ class SimHashModel():
             data = pickle.load(handle)
 
         objs = []
-        for item in tqdm.tqdm(data[:100]):
+        for item in tqdm.tqdm(data):
             tokens = item['data']
 
 
